@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin | desmayo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <section class="upload admin-panel" id="subir-fotos">
+        <p class="eyebrow">Zona privada</p>
+        <h1>Sube tus fotos</h1>
+        <p>Introduce tu clave, elige las imagenes y se guardaran en la carpeta imagenes del backend.</p>
+
+        <div class="admin-form">
+          <label for="adminKey">Clave de administrador</label>
+          <input id="adminKey" type="password" autocomplete="current-password" placeholder="Tu clave" />
+
+          <div class="album-mode">
+            <label>
+              <input type="radio" name="albumMode" value="new" checked />
+              Nuevo album
+            </label>
+            <label>
+              <input type="radio" name="albumMode" value="existing" />
+              Album existente
+            </label>
+          </div>
+
+          <div class="album-fields" id="newAlbumFields">
+            <label for="albumName">Nombre del album</label>
+            <input id="albumName" type="text" placeholder="Ej: Fiesta viernes 20" />
+
+            <label for="albumDescription">Descripcion</label>
+            <textarea id="albumDescription" rows="3" placeholder="Opcional"></textarea>
+          </div>
+
+          <div class="album-fields is-hidden" id="existingAlbumFields">
+            <label for="albumSelect">Elegir album</label>
+            <select id="albumSelect">
+              <option value="">Cargando albumes...</option>
+            </select>
+          </div>
+
+          <label for="photoInput">Fotos</label>
+          <input type="file" id="photoInput" accept="image/*" multiple />
+
+          <button class="btn btn-primary" id="uploadButton" type="button">Subir fotos</button>
+          <span class="status" id="uploadStatus">Esperando fotos</span>
+        </div>
+
+        <div class="preview-grid" id="previewGrid"></div>
+        <a class="btn btn-secondary" href="index.html">Volver a la web</a>
+      </section>
+    </main>
+
+    <script src="admin.js"></script>
+  </body>
+</html>
