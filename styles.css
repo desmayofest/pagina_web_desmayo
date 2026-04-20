@@ -143,7 +143,7 @@ img {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #030303;
+  background: #070207;
 }
 
 .hero-slideshow::after {
@@ -166,64 +166,60 @@ img {
   background-size: cover;
   filter: saturate(1.22) contrast(1.02) brightness(1.18);
   transform: scale(1.04);
-  animation: heroFade 64s infinite;
+  animation: heroFade 70s infinite ease-in-out;
   will-change: opacity, transform;
 }
 
 .hero-slide-1 {
-  background-image: url("imagenes/457C28DB-28C4-4AC2-9A9D-FFF4EC81B2B4.jpg");
+  background-image: url("imagenes/1%20capt.png");
+  animation-delay: -2s;
 }
 
 .hero-slide-2 {
-  background-image: url("imagenes/5D85FC3D-D4D4-4E72-8540-BF5C881466D9.jpg");
+  background-image: url("imagenes/2.png");
   animation-delay: 8s;
 }
 
 .hero-slide-3 {
-  background-image: url("imagenes/7E0195EE-BEDF-48D1-8F14-BFFE0C5F663E.jpg");
-  animation-delay: 16s;
+  background-image: url("imagenes/3.png");
+  animation-delay: 18s;
 }
 
 .hero-slide-4 {
-  background-image: url("imagenes/90B69022-3AE0-49D7-88B6-700BC4063BBF.jpg");
-  animation-delay: 24s;
+  background-image: url("imagenes/4.png");
+  animation-delay: 28s;
 }
 
 .hero-slide-5 {
-  background-image: url("imagenes/A65B6DF0-72BA-4710-83E4-780554B7993D.jpg");
-  animation-delay: 32s;
+  background-image: url("imagenes/5.png");
+  animation-delay: 38s;
 }
 
 .hero-slide-6 {
-  background-image: url("imagenes/F0B3A7D6-7FC9-4E18-AF54-2DADDFB9A283.jpg");
-  animation-delay: 40s;
-}
-
-.hero-slide-7 {
-  background-image: url("imagenes/IMG_3605.jpg");
+  background-image: url("imagenes/6.png");
   animation-delay: 48s;
 }
 
-.hero-slide-8 {
-  background-image: url("imagenes/IMG_8383.jpg");
-  animation-delay: 56s;
+.hero-slide-7 {
+  background-image: url("imagenes/7.png");
+  animation-delay: 58s;
 }
 
 @keyframes heroFade {
   0% {
     opacity: 0;
-    transform: scale(1.04);
+    transform: scale(1.035);
   }
 
-  4%,
-  10.5% {
+  3%,
+  18% {
     opacity: 1;
   }
 
-  13%,
+  23%,
   100% {
     opacity: 0;
-    transform: scale(1.12);
+    transform: scale(1.105);
   }
 }
 
