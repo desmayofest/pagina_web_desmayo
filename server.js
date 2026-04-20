@@ -288,7 +288,7 @@ async function handleUpload(request, response) {
   }
 }
 
-const server = http.createServer((request, response) => {
+function handleRequest(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
 
   if (request.method === 'OPTIONS') {
@@ -321,9 +321,15 @@ const server = http.createServer((request, response) => {
 
   const pathname = url.pathname === '/' ? '/index.html' : decodeURIComponent(url.pathname);
   serveFile(response, path.join(ROOT_DIR, pathname));
-});
+}
 
-server.listen(PORT, () => {
-  console.log(`Servidor listo en http://localhost:${PORT}`);
-  console.log(`Admin: http://localhost:${PORT}/admin.html`);
-});
+if (require.main === module) {
+  const server = http.createServer(handleRequest);
+
+  server.listen(PORT, () => {
+    console.log(`Servidor listo en http://localhost:${PORT}`);
+    console.log(`Admin: http://localhost:${PORT}/admin.html`);
+  });
+}
+
+module.exports = handleRequest;
