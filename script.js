@@ -4,6 +4,7 @@ const galleryDescription = document.getElementById('galleryDescription');
 const backToAlbums = document.getElementById('backToAlbums');
 const navToggle = document.getElementById('navToggle');
 const navMenu = document.getElementById('navMenu');
+const siteNav = document.getElementById('siteNav');
 const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
 
 function renderEmptyGallery(message) {
@@ -122,6 +123,22 @@ if (navToggle && navMenu) {
       navToggle.setAttribute('aria-expanded', 'false');
     });
   });
+}
+
+if (siteNav && navToggle && navMenu) {
+  const handleNavState = () => {
+    const shouldCompact = window.innerWidth > 840 && window.scrollY > 90;
+    siteNav.classList.toggle('is-compact', shouldCompact);
+
+    if (!shouldCompact && window.innerWidth > 840) {
+      navMenu.classList.remove('is-open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }
+  };
+
+  window.addEventListener('scroll', handleNavState, { passive: true });
+  window.addEventListener('resize', handleNavState);
+  handleNavState();
 }
 
 loadAlbums();
