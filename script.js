@@ -3,11 +3,43 @@ const galleryTitle = document.getElementById('galleryTitle');
 const galleryDescription = document.getElementById('galleryDescription');
 const backToAlbums = document.getElementById('backToAlbums');
 const navToggle = document.getElementById('navToggle');
+const navClose = document.getElementById('navClose');
 const navMenu = document.getElementById('navMenu');
-const siteNav = document.getElementById('siteNav');
 const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
 
+function openMenu() {
+  if (!navToggle || !navMenu) return;
+
+  navMenu.classList.add('is-open');
+  document.body.classList.add('menu-open');
+  navToggle.setAttribute('aria-expanded', 'true');
+  navMenu.setAttribute('aria-hidden', 'false');
+}
+
+function closeMenu() {
+  if (!navToggle || !navMenu) return;
+
+  navMenu.classList.remove('is-open');
+  document.body.classList.remove('menu-open');
+  navToggle.setAttribute('aria-expanded', 'false');
+  navMenu.setAttribute('aria-hidden', 'true');
+}
+
+if (navToggle && navMenu) {
+  navToggle.addEventListener('click', openMenu);
+  navClose?.addEventListener('click', closeMenu);
+
+  navMenu.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', closeMenu);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMenu();
+  });
+}
+
 function renderEmptyGallery(message) {
+  if (!galleryGrid) return;
   galleryGrid.innerHTML = `<p class="gallery-empty">${message}</p>`;
 }
 
@@ -50,6 +82,8 @@ function renderAlbumCard(album) {
 }
 
 async function loadAlbums() {
+  if (!galleryGrid || !galleryTitle || !galleryDescription || !backToAlbums) return;
+
   galleryTitle.textContent = 'Albumes de fiestas';
   galleryDescription.textContent = 'Selecciona una fiesta para ver todas sus fotos.';
   backToAlbums.classList.add('is-hidden');
@@ -75,6 +109,8 @@ async function loadAlbums() {
 }
 
 async function loadAlbum(albumId) {
+  if (!galleryGrid || !galleryTitle || !galleryDescription || !backToAlbums) return;
+
   renderEmptyGallery('Cargando fotos...');
 
   try {
@@ -109,36 +145,5 @@ async function loadAlbum(albumId) {
   }
 }
 
-backToAlbums.addEventListener('click', loadAlbums);
-
-if (navToggle && navMenu) {
-  navToggle.addEventListener('click', () => {
-    const isOpen = navMenu.classList.toggle('is-open');
-    navToggle.setAttribute('aria-expanded', String(isOpen));
-  });
-
-  navMenu.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      navMenu.classList.remove('is-open');
-      navToggle.setAttribute('aria-expanded', 'false');
-    });
-  });
-}
-
-if (siteNav && navToggle && navMenu) {
-  const handleNavState = () => {
-    const shouldCompact = window.innerWidth > 840 && window.scrollY > 90;
-    siteNav.classList.toggle('is-compact', shouldCompact);
-
-    if (!shouldCompact && window.innerWidth > 840) {
-      navMenu.classList.remove('is-open');
-      navToggle.setAttribute('aria-expanded', 'false');
-    }
-  };
-
-  window.addEventListener('scroll', handleNavState, { passive: true });
-  window.addEventListener('resize', handleNavState);
-  handleNavState();
-}
-
+backToAlbums?.addEventListener('click', loadAlbums);
 loadAlbums();
