@@ -1,7 +1,7 @@
 const galleryGrid = document.getElementById('galleryGrid');
 const galleryTitle = document.getElementById('galleryTitle');
 const galleryDescription = document.getElementById('galleryDescription');
-const backToAlbums = document.getElementById('backToAlbums');
+const calendarGrid = document.getElementById('calendarGrid');
 const navToggle = document.getElementById('navToggle');
 const navMenu = document.getElementById('navMenu');
 const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
@@ -21,10 +21,102 @@ function getImageUrl(url) {
   return `${API_BASE}${url}`;
 }
 
+function renderCalendarEmpty(message) {
+  if (!calendarGrid) return;
+  calendarGrid.innerHTML = `<p class="calendar-empty">${message}</p>`;
+}
+
+function createCalendarCard(event) {
+  const card = document.createElement('article');
+  card.className = `calendar-card${event.flyerUrl ? '' : ' calendar-card-fallback'}`;
+
+  if (event.flyerUrl) {
+    card.style.backgroundImage = `linear-gradient(180deg, rgba(3, 3, 3, 0.12), rgba(3, 3, 3, 0.86)), linear-gradient(135deg, rgba(245, 0, 159, 0.28), rgba(0, 0, 0, 0.14) 48%, rgba(120, 201, 110, 0.18)), url("${getImageUrl(event.flyerUrl)}")`;
+  }
+
+  const date = document.createElement('span');
+  date.className = 'calendar-date';
+
+  const day = document.createElement('strong');
+  day.textContent = event.day || '--';
+
+  const month = document.createElement('small');
+  month.textContent = event.month || 'Fecha';
+
+  date.append(day, month);
+
+  const content = document.createElement('div');
+  content.className = 'calendar-card-content';
+
+  const location = document.createElement('span');
+  location.className = 'calendar-location';
+  location.textContent = event.location || 'Ubicación por confirmar';
+
+  const title = document.createElement('h3');
+  title.textContent = event.title || 'Próximo Desmayo';
+
+  const description = document.createElement('p');
+  description.textContent = event.description || 'Muy pronto anunciaremos más detalles de esta fecha.';
+
+  content.append(location, title, description);
+  card.append(date, content);
+
+  return card;
+}
+
+function renderFallbackEvents() {
+  const events = [
+    {
+      day: '--',
+      month: 'Pronto',
+      location: 'Costa Brava',
+      title: 'Open air Desmayo',
+      description: 'Sunset, noche larga y la energía de siempre. Fecha por confirmar.',
+    },
+    {
+      day: '--',
+      month: 'Pronto',
+      location: 'Barcelona',
+      title: 'Club night',
+      description: 'Lineup invitado, sala llena y ambiente Desmayo en la ciudad.',
+    },
+    {
+      day: '--',
+      month: 'Pronto',
+      location: 'Menorca',
+      title: 'Especial verano',
+      description: 'Una nueva noche mediterránea para volver a juntar a la comunidad.',
+    },
+  ];
+
+  calendarGrid.innerHTML = '';
+  events.forEach((event) => calendarGrid.appendChild(createCalendarCard(event)));
+}
+
+async function loadEvents() {
+  if (!calendarGrid) return;
+  renderCalendarEmpty('Cargando próximas fechas...');
+
+  try {
+    const response = await fetch(`${API_BASE}/api/events`);
+    if (!response.ok) throw new Error('No se pudieron cargar los eventos');
+
+    const events = await response.json();
+    if (!events.length) {
+      renderFallbackEvents();
+      return;
+    }
+
+    calendarGrid.innerHTML = '';
+    events.forEach((event) => calendarGrid.appendChild(createCalendarCard(event)));
+  } catch (error) {
+    renderFallbackEvents();
+  }
+}
+
 function renderAlbumCard(album) {
-  const card = document.createElement('button');
+  const card = document.createElement('article');
   card.className = 'card album-card';
-  card.type = 'button';
 
   if (album.coverUrl) {
     const img = document.createElement('img');
@@ -42,24 +134,46 @@ function renderAlbumCard(album) {
   const info = document.createElement('span');
   info.className = 'album-info';
 
+  const meta = document.createElement('small');
+  meta.textContent = [album.venue, album.city, formatAlbumDate(album.date)].filter(Boolean).join(' · ') || 'Desmayo';
+
   const name = document.createElement('strong');
   name.textContent = album.name;
 
   const count = document.createElement('small');
+  count.className = 'album-count';
   count.textContent = `${album.count} foto${album.count === 1 ? '' : 's'}`;
 
-  info.append(name, count);
+  const actions = document.createElement('span');
+  actions.className = 'album-actions';
+
+  const viewLink = document.createElement('a');
+  viewLink.className = 'album-action';
+  viewLink.href = `galeria.html#album=${encodeURIComponent(album.id)}`;
+  viewLink.textContent = 'Ver fotos';
+
+  const downloadLink = document.createElement('a');
+  downloadLink.className = 'album-action album-action-secondary';
+  downloadLink.href = `galeria.html#album=${encodeURIComponent(album.id)}`;
+  downloadLink.textContent = 'Descargar';
+
+  actions.append(viewLink, downloadLink);
+  info.append(meta, name, count, actions);
   card.appendChild(info);
-  card.addEventListener('click', () => loadAlbum(album.id));
 
   return card;
 }
 
+function formatAlbumDate(value) {
+  if (!value) return '';
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('es', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
+}
+
 async function loadAlbums() {
-  galleryTitle.textContent = 'Álbumes de fiestas';
-  galleryDescription.textContent = 'Selecciona una fiesta para ver todas sus fotos.';
-  backToAlbums.classList.add('is-hidden');
-  renderEmptyGallery('Cargando álbumes...');
+  if (!galleryGrid) return;
+  renderEmptyGallery('Cargando álbumes destacados...');
 
   try {
     const response = await fetch(`${API_BASE}/api/albums`);
@@ -67,55 +181,19 @@ async function loadAlbums() {
 
     const albums = await response.json();
     if (!albums.length) {
-      renderEmptyGallery('Todavía no hay álbumes subidos.');
+      renderEmptyGallery('Todavía no hay álbumes publicados.');
       return;
     }
 
+    const featuredAlbums = albums.filter((album) => album.featured).concat(albums.filter((album) => !album.featured)).slice(0, 4);
     galleryGrid.innerHTML = '';
-    albums.forEach((album) => {
+    featuredAlbums.forEach((album) => {
       galleryGrid.appendChild(renderAlbumCard(album));
     });
   } catch (error) {
     renderEmptyGallery('No se pudieron cargar los álbumes ahora mismo.');
   }
 }
-
-async function loadAlbum(albumId) {
-  renderEmptyGallery('Cargando fotos...');
-
-  try {
-    const response = await fetch(`${API_BASE}/api/albums/${encodeURIComponent(albumId)}/images`);
-    if (!response.ok) throw new Error('No se pudo cargar el álbum');
-
-    const album = await response.json();
-    galleryTitle.textContent = album.name;
-    galleryDescription.textContent = album.description || 'Fotos de esta fiesta.';
-    backToAlbums.classList.remove('is-hidden');
-
-    if (!album.images.length) {
-      renderEmptyGallery('Este álbum todavía no tiene fotos.');
-      return;
-    }
-
-    galleryGrid.innerHTML = '';
-    album.images.forEach((image) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-
-      const img = document.createElement('img');
-      img.src = getImageUrl(image.url);
-      img.alt = image.name;
-      img.loading = 'lazy';
-
-      card.appendChild(img);
-      galleryGrid.appendChild(card);
-    });
-  } catch (error) {
-    renderEmptyGallery('No se pudo cargar este álbum ahora mismo.');
-  }
-}
-
-backToAlbums.addEventListener('click', loadAlbums);
 
 if (navToggle && navMenu) {
   navToggle.addEventListener('click', () => {
@@ -143,3 +221,4 @@ if (navToggle && navMenu) {
 }
 
 loadAlbums();
+loadEvents();

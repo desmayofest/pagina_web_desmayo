@@ -19,7 +19,7 @@
       <div class="site-nav-menu" id="navMenu">
         <div class="site-nav-menu-inner">
           <a href="#calendario">Calendario de eventos</a>
-          <a href="#galeria">Galerías</a>
+          <a href="galeria.html">Galerías</a>
           <a href="#about">Sobre nosotros</a>
           <a href="#contacto">Contacto</a>
         </div>
@@ -50,38 +50,25 @@
       <section class="calendar" id="calendario">
         <div class="calendar-copy">
           <p class="calendar-kicker">Calendario de eventos</p>
-          <h2>Las próximas noches ya están calentando motores</h2>
-          <p>Mantente atento a las próximas fechas, ciudades y colaboraciones especiales de Desmayo.</p>
+          <h2>Próximas fechas Desmayo</h2>
+          <p>Consulta las próximas noches confirmadas, descubre la ciudad y guarda la fecha antes de que empiece el movimiento.</p>
         </div>
-        <div class="calendar-grid">
-          <article class="calendar-card">
-            <span>Próximamente</span>
-            <strong>Costa Brava</strong>
-            <small>Open air, sunset y noche larga</small>
-          </article>
-          <article class="calendar-card">
-            <span>Próximamente</span>
-            <strong>Barcelona</strong>
-            <small>Lineup invitado y energía Desmayo</small>
-          </article>
-          <article class="calendar-card">
-            <span>Próximamente</span>
-            <strong>Menorca</strong>
-            <small>Especial verano y vibra mediterránea</small>
-          </article>
+        <div class="calendar-grid" id="calendarGrid">
+          <p class="calendar-empty">Cargando próximas fechas...</p>
         </div>
       </section>
 
       <section class="gallery" id="galeria">
-        <div class="gallery-header">
+        <div class="gallery-header gallery-teaser-header">
           <div>
-            <h2 id="galleryTitle">Álbumes de fiestas</h2>
-            <p id="galleryDescription">Selecciona una fiesta para ver todas sus fotos.</p>
+            <p class="gallery-kicker">Álbumes de fiestas</p>
+            <h2 id="galleryTitle">Momentos Desmayo</h2>
+            <p id="galleryDescription">Una selección de noches, salas y fotos para revivir lo que pasó dentro.</p>
           </div>
-          <button class="btn btn-secondary gallery-back is-hidden" id="backToAlbums" type="button">Ver álbumes</button>
+          <a class="btn btn-secondary gallery-all-link" href="galeria.html">Ver todos los álbumes</a>
         </div>
         <div class="grid" id="galleryGrid">
-          <p class="gallery-empty">Cargando álbumes...</p>
+          <p class="gallery-empty">Cargando álbumes destacados...</p>
         </div>
       </section>
 

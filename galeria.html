@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Álbumes | Desmayo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="gallery-page">
+    <nav class="site-nav" aria-label="Menú principal">
+      <button class="site-nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navMenu" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="site-nav-menu" id="navMenu">
+        <div class="site-nav-menu-inner">
+          <a href="index.html#calendario">Calendario de eventos</a>
+          <a href="galeria.html">Galerías</a>
+          <a href="index.html#about">Sobre nosotros</a>
+          <a href="index.html#contacto">Contacto</a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="gallery-page-main">
+      <section class="gallery-hero">
+        <a class="gallery-return" href="index.html#galeria">Volver a la web</a>
+        <p class="gallery-kicker">Archivo Desmayo</p>
+        <h1>Álbumes de fiestas</h1>
+        <p>Explora cada noche por fiesta, fecha y sala. Abre el álbum, descarga tus fotos y revive el momento.</p>
+      </section>
+
+      <section class="gallery-browser" aria-label="Listado de álbumes">
+        <div class="gallery-filters">
+          <label>
+            Buscar fiesta
+            <input id="albumSearch" type="search" placeholder="Nombre, ciudad o sala" />
+          </label>
+          <label>
+            Sala / club
+            <select id="venueFilter">
+              <option value="">Todas las salas</option>
+            </select>
+          </label>
+          <label>
+            Fecha
+            <select id="dateFilter">
+              <option value="">Todas las fechas</option>
+            </select>
+          </label>
+          <button class="btn btn-secondary" id="clearAlbumFilters" type="button">Limpiar filtros</button>
+        </div>
+
+        <div class="gallery-full-grid" id="albumsGrid">
+          <p class="gallery-empty">Cargando álbumes...</p>
+        </div>
+      </section>
+
+      <section class="album-view is-hidden" id="albumView" aria-label="Fotos del álbum">
+        <div class="album-view-header">
+          <button class="btn btn-secondary" id="backToAlbumList" type="button">Volver a álbumes</button>
+          <div>
+            <p class="gallery-kicker" id="albumViewMeta">Álbum</p>
+            <h2 id="albumViewTitle">Fotos</h2>
+            <p id="albumViewDescription">Selecciona una foto para ampliarla.</p>
+          </div>
+          <button class="btn btn-primary" id="downloadAlbumButton" type="button">Descargar álbum</button>
+        </div>
+        <div class="photo-masonry" id="photoGrid"></div>
+      </section>
+    </main>
+
+    <div class="lightbox is-hidden" id="photoLightbox" role="dialog" aria-modal="true" aria-label="Foto ampliada">
+      <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Cerrar">×</button>
+      <img id="lightboxImage" alt="" />
+      <a class="btn btn-primary" id="lightboxDownload" href="#" download>Descargar foto</a>
+    </div>
+
+    <script src="galeria.js"></script>
+  </body>
+</html>

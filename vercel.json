@@ -7,9 +7,11 @@
       "config": {
         "includeFiles": [
           "index.html",
+          "galeria.html",
           "admin.html",
           "styles.css",
           "script.js",
+          "galeria.js",
           "admin.js",
           "assets/**",
           "imagenes/**"

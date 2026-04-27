@@ -8,10 +8,13 @@ const ADMIN_KEY = process.env.ADMIN_KEY || 'Lluc2026';
 const ROOT_DIR = __dirname;
 const IMAGES_DIR = path.join(ROOT_DIR, 'imagenes');
 const ALBUMS_FILE = path.join(IMAGES_DIR, 'albumes.json');
+const EVENTS_FILE = path.join(IMAGES_DIR, 'eventos.json');
+const EVENTS_DIR = path.join(IMAGES_DIR, 'eventos');
 const MAX_UPLOAD_SIZE = 60 * 1024 * 1024;
 const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp']);
 
 fs.mkdirSync(IMAGES_DIR, { recursive: true });
+fs.mkdirSync(EVENTS_DIR, { recursive: true });
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -70,6 +73,202 @@ function writeAlbumsMeta(albums) {
   fs.writeFileSync(ALBUMS_FILE, JSON.stringify(albums, null, 2));
 }
 
+function readEventsMeta() {
+  try {
+    return JSON.parse(fs.readFileSync(EVENTS_FILE, 'utf8'));
+  } catch (error) {
+    return [];
+  }
+}
+
+function writeEventsMeta(events) {
+  fs.writeFileSync(EVENTS_FILE, JSON.stringify(events, null, 2));
+}
+
+function normalizeAlbum(album) {
+  return {
+    id: album.id,
+    name: album.name || 'Álbum Desmayo',
+    description: album.description || '',
+    date: album.date || '',
+    venue: album.venue || '',
+    city: album.city || '',
+    coverUrl: album.coverUrl || '',
+    status: album.status === 'hidden' ? 'hidden' : 'visible',
+    featured: album.featured === true || album.featured === 'true',
+    order: Number(album.order) || 0,
+    createdAt: album.createdAt || 0,
+    updatedAt: album.updatedAt || 0,
+  };
+}
+
+function sortAlbums(albums) {
+  return albums.sort((a, b) => {
+    if ((a.order || 0) !== (b.order || 0)) return (a.order || 0) - (b.order || 0);
+    const dateA = Date.parse(a.date || '') || 0;
+    const dateB = Date.parse(b.date || '') || 0;
+    if (dateA !== dateB) return dateB - dateA;
+    return (b.createdAt || 0) - (a.createdAt || 0);
+  });
+}
+
+function normalizeEvent(event) {
+  return {
+    id: event.id,
+    day: event.day || '',
+    month: event.month || '',
+    location: event.location || '',
+    title: event.title || '',
+    description: event.description || '',
+    flyerUrl: event.flyerUrl || '',
+    status: event.status === 'hidden' ? 'hidden' : 'visible',
+    sortDate: event.sortDate || '',
+    createdAt: event.createdAt || 0,
+    updatedAt: event.updatedAt || 0,
+  };
+}
+
+function sortEvents(events) {
+  return events.sort((a, b) => {
+    const dateA = Date.parse(a.sortDate || '') || Number.MAX_SAFE_INTEGER;
+    const dateB = Date.parse(b.sortDate || '') || Number.MAX_SAFE_INTEGER;
+    if (dateA !== dateB) return dateA - dateB;
+    return (a.createdAt || 0) - (b.createdAt || 0);
+  });
+}
+
+function listEvents(response, includeHidden = false) {
+  const events = readEventsMeta()
+    .map(normalizeEvent)
+    .filter((event) => includeHidden || event.status === 'visible');
+
+  sendJson(response, 200, sortEvents(events));
+}
+
+function validateEventFields(fields) {
+  const day = (fields.day || '').trim();
+  const month = (fields.month || '').trim();
+  const location = (fields.location || '').trim();
+  const title = (fields.title || '').trim();
+  const sortDate = (fields.sortDate || '').trim();
+
+  if (!day) return 'Escribe el día del evento.';
+  if (!month) return 'Escribe el mes del evento.';
+  if (!location) return 'Escribe la ciudad o ubicación.';
+  if (!title) return 'Escribe el título del evento.';
+  if (!sortDate) return 'Indica la fecha real para ordenar.';
+  if (Number.isNaN(Date.parse(sortDate))) return 'La fecha real no es válida.';
+
+  return '';
+}
+
+function saveEvent(fields, files) {
+  const error = validateEventFields(fields);
+  if (error) return { error };
+
+  const events = readEventsMeta().map(normalizeEvent);
+  const now = Date.now();
+  const existingIndex = events.findIndex((event) => event.id === fields.eventId);
+  const existing = existingIndex >= 0 ? events[existingIndex] : null;
+  const baseId = existing?.id || slugify(`${fields.sortDate}-${fields.title}`) || `evento-${now}`;
+  let id = baseId;
+  let suffix = 2;
+
+  while (!existing && events.some((event) => event.id === id)) {
+    id = `${baseId}-${suffix}`;
+    suffix += 1;
+  }
+
+  let flyerUrl = existing?.flyerUrl || '';
+  const flyer = files.find((file) => file.filename);
+  if (flyer) {
+    const extension = path.extname(flyer.filename).toLowerCase();
+    if (!IMAGE_EXTENSIONS.has(extension) || !flyer.type.startsWith('image/')) {
+      return { error: 'El flyer debe ser una imagen válida.' };
+    }
+
+    const safeName = sanitizeFilename(flyer.filename);
+    fs.writeFileSync(path.join(EVENTS_DIR, safeName), flyer.content);
+    flyerUrl = `/imagenes/eventos/${safeName}`;
+  }
+
+  const event = normalizeEvent({
+    id,
+    day: (fields.day || '').trim(),
+    month: (fields.month || '').trim(),
+    location: (fields.location || '').trim(),
+    title: (fields.title || '').trim(),
+    description: (fields.description || '').trim(),
+    flyerUrl,
+    status: fields.status === 'hidden' ? 'hidden' : 'visible',
+    sortDate: (fields.sortDate || '').trim(),
+    createdAt: existing?.createdAt || now,
+    updatedAt: now,
+  });
+
+  if (existingIndex >= 0) {
+    events[existingIndex] = event;
+  } else {
+    events.push(event);
+  }
+
+  writeEventsMeta(sortEvents(events));
+  return { event };
+}
+
+async function handleEventSave(request, response) {
+  if (request.headers['x-admin-key'] !== ADMIN_KEY) {
+    sendJson(response, 401, { error: 'Clave incorrecta.' });
+    return;
+  }
+
+  const contentType = request.headers['content-type'] || '';
+  const boundaryMatch = contentType.match(/boundary=(.+)$/);
+  if (!boundaryMatch) {
+    sendJson(response, 400, { error: 'Petición de evento no válida.' });
+    return;
+  }
+
+  try {
+    const body = await getRequestBody(request);
+    const { fields, files } = parseMultipart(body, boundaryMatch[1]);
+    const result = saveEvent(fields, files);
+
+    if (result.error) {
+      sendJson(response, 400, { error: result.error });
+      return;
+    }
+
+    sendJson(response, 200, result.event);
+  } catch (error) {
+    sendJson(response, 413, { error: error.message || 'No se pudo guardar el evento.' });
+  }
+}
+
+async function handleEventDelete(request, response) {
+  if (request.headers['x-admin-key'] !== ADMIN_KEY) {
+    sendJson(response, 401, { error: 'Clave incorrecta.' });
+    return;
+  }
+
+  try {
+    const body = await getRequestBody(request);
+    const payload = JSON.parse(body.toString('utf8') || '{}');
+    const events = readEventsMeta().map(normalizeEvent);
+    const nextEvents = events.filter((event) => event.id !== payload.id);
+
+    if (nextEvents.length === events.length) {
+      sendJson(response, 404, { error: 'Evento no encontrado.' });
+      return;
+    }
+
+    writeEventsMeta(nextEvents);
+    sendJson(response, 200, { success: true });
+  } catch (error) {
+    sendJson(response, 400, { error: 'No se pudo eliminar el evento.' });
+  }
+}
+
 function getAlbumImages(albumId) {
   const albumDir = path.join(IMAGES_DIR, albumId);
   if (!fs.existsSync(albumDir)) return [];
@@ -86,39 +285,36 @@ function getAlbumImages(albumId) {
     .map(({ name, url }) => ({ name, url }));
 }
 
-function listAlbums(response) {
-  const meta = readAlbumsMeta();
-  const albums = meta
-    .filter((album) => album.id && fs.existsSync(path.join(IMAGES_DIR, album.id)))
-    .map((album) => {
-      const images = getAlbumImages(album.id);
-      return {
-        id: album.id,
-        name: album.name,
-        description: album.description || '',
-        count: images.length,
-        coverUrl: images[0]?.url || '',
-        createdAt: album.createdAt || 0,
-      };
-    })
-    .sort((a, b) => b.createdAt - a.createdAt);
+function getAlbumPayload(album, includeImages = false) {
+  const images = getAlbumImages(album.id);
+  const coverUrl = album.coverUrl || images[0]?.url || '';
 
-  sendJson(response, 200, albums);
+  return {
+    ...album,
+    count: images.length,
+    coverUrl,
+    images: includeImages ? images : undefined,
+  };
+}
+
+function listAlbums(response, includeHidden = false) {
+  const albums = readAlbumsMeta()
+    .map(normalizeAlbum)
+    .filter((album) => album.id && fs.existsSync(path.join(IMAGES_DIR, album.id)))
+    .filter((album) => includeHidden || album.status === 'visible')
+    .map((album) => getAlbumPayload(album));
+
+  sendJson(response, 200, sortAlbums(albums));
 }
 
 function listAlbumImages(response, albumId) {
-  const album = readAlbumsMeta().find((item) => item.id === albumId);
+  const album = readAlbumsMeta().map(normalizeAlbum).find((item) => item.id === albumId);
   if (!album) {
-    sendJson(response, 404, { error: 'Album no encontrado.' });
+    sendJson(response, 404, { error: 'Álbum no encontrado.' });
     return;
   }
 
-  sendJson(response, 200, {
-    id: album.id,
-    name: album.name,
-    description: album.description || '',
-    images: getAlbumImages(album.id),
-  });
+  sendJson(response, 200, getAlbumPayload(album, true));
 }
 
 function serveFile(response, filePath) {
@@ -189,6 +385,7 @@ function parseMultipart(buffer, boundary) {
 
     if (filenameMatch && filenameMatch[1]) {
       parts.files.push({
+        fieldName: nameMatch ? nameMatch[1] : '',
         filename: filenameMatch[1],
         type: typeMatch ? typeMatch[1].trim() : '',
         content,
@@ -203,39 +400,89 @@ function parseMultipart(buffer, boundary) {
   return parts;
 }
 
-function getUploadAlbum(fields) {
-  const albums = readAlbumsMeta();
-  const mode = fields.albumMode === 'existing' ? 'existing' : 'new';
+function validateAlbumFields(fields, isExisting) {
+  if (!isExisting && !(fields.albumName || '').trim()) return 'Escribe el nombre del álbum.';
+  return '';
+}
+
+function saveAlbum(fields, files = []) {
+  const albums = readAlbumsMeta().map(normalizeAlbum);
+  const mode = fields.albumMode === 'existing' || fields.albumId ? 'existing' : 'new';
+  const now = Date.now();
+  const existingIndex = albums.findIndex((item) => item.id === fields.albumId);
+  const existing = existingIndex >= 0 ? albums[existingIndex] : null;
+  const validationError = validateAlbumFields(fields, Boolean(existing));
+
+  if (validationError) return { error: validationError };
 
   if (mode === 'existing') {
-    const album = albums.find((item) => item.id === fields.albumId);
-    if (!album) return { error: 'Selecciona un album existente valido.' };
-    return { album, albums };
+    if (!existing) return { error: 'Selecciona un álbum existente válido.' };
   }
 
-  const name = (fields.albumName || '').trim();
-  if (!name) return { error: 'Escribe el nombre del album.' };
-
-  const baseId = slugify(name) || `album-${Date.now()}`;
+  const name = (fields.albumName || existing?.name || '').trim();
+  const baseId = existing?.id || slugify(name) || `album-${now}`;
   let id = baseId;
   let suffix = 2;
-  while (albums.some((album) => album.id === id) || fs.existsSync(path.join(IMAGES_DIR, id))) {
+
+  while (!existing && (albums.some((album) => album.id === id) || fs.existsSync(path.join(IMAGES_DIR, id)))) {
     id = `${baseId}-${suffix}`;
     suffix += 1;
   }
 
-  const album = {
+  const albumDir = path.join(IMAGES_DIR, id);
+  fs.mkdirSync(albumDir, { recursive: true });
+
+  let coverUrl = existing?.coverUrl || '';
+  const savedFiles = [];
+  const coverFile = files.find((file) => file.fieldName === 'albumCover' || file.fieldName === 'cover');
+
+  if (coverFile) {
+    const extension = path.extname(coverFile.filename).toLowerCase();
+    if (!IMAGE_EXTENSIONS.has(extension) || !coverFile.type.startsWith('image/')) {
+      return { error: 'La portada debe ser una imagen válida.' };
+    }
+
+    const safeName = sanitizeFilename(coverFile.filename);
+    fs.writeFileSync(path.join(albumDir, safeName), coverFile.content);
+    coverUrl = `/imagenes/${id}/${safeName}`;
+  }
+
+  for (const file of files) {
+    if (file === coverFile) continue;
+    const extension = path.extname(file.filename).toLowerCase();
+    if (!IMAGE_EXTENSIONS.has(extension) || !file.type.startsWith('image/')) continue;
+
+    const safeName = sanitizeFilename(file.filename);
+    fs.writeFileSync(path.join(albumDir, safeName), file.content);
+    savedFiles.push({
+      name: safeName,
+      url: `/imagenes/${id}/${safeName}`,
+    });
+  }
+
+  const album = normalizeAlbum({
     id,
     name,
     description: (fields.albumDescription || '').trim(),
-    createdAt: Date.now(),
-  };
+    date: (fields.albumDate || '').trim(),
+    venue: (fields.albumVenue || '').trim(),
+    city: (fields.albumCity || '').trim(),
+    coverUrl,
+    status: fields.albumStatus === 'hidden' ? 'hidden' : 'visible',
+    featured: fields.albumFeatured === 'true',
+    order: fields.albumOrder,
+    createdAt: existing?.createdAt || now,
+    updatedAt: now,
+  });
 
-  albums.push(album);
-  writeAlbumsMeta(albums);
-  fs.mkdirSync(path.join(IMAGES_DIR, id), { recursive: true });
+  if (existingIndex >= 0) {
+    albums[existingIndex] = album;
+  } else {
+    albums.push(album);
+  }
 
-  return { album, albums };
+  writeAlbumsMeta(sortAlbums(albums));
+  return { album: getAlbumPayload(album), files: savedFiles };
 }
 
 async function handleUpload(request, response) {
@@ -254,37 +501,110 @@ async function handleUpload(request, response) {
   try {
     const body = await getRequestBody(request);
     const { fields, files } = parseMultipart(body, boundaryMatch[1]);
-    const albumResult = getUploadAlbum(fields);
+    const albumResult = saveAlbum(fields, files);
 
     if (albumResult.error) {
       sendJson(response, 400, { error: albumResult.error });
       return;
     }
 
-    const albumDir = path.join(IMAGES_DIR, albumResult.album.id);
-    fs.mkdirSync(albumDir, { recursive: true });
-
-    const savedFiles = [];
-    for (const file of files) {
-      const extension = path.extname(file.filename).toLowerCase();
-      if (!IMAGE_EXTENSIONS.has(extension) || !file.type.startsWith('image/')) continue;
-
-      const safeName = sanitizeFilename(file.filename);
-      fs.writeFileSync(path.join(albumDir, safeName), file.content);
-      savedFiles.push({
-        name: safeName,
-        url: `/imagenes/${albumResult.album.id}/${safeName}`,
-      });
-    }
-
-    if (!savedFiles.length) {
-      sendJson(response, 400, { error: 'No se encontro ninguna imagen valida.' });
+    if (!albumResult.files.length && !albumResult.album.coverUrl) {
+      sendJson(response, 400, { error: 'No se encontró ninguna imagen válida.' });
       return;
     }
 
-    sendJson(response, 200, { album: albumResult.album, files: savedFiles });
+    sendJson(response, 200, albumResult);
   } catch (error) {
     sendJson(response, 413, { error: error.message || 'No se pudo completar la subida.' });
+  }
+}
+
+async function handleAlbumSave(request, response) {
+  if (request.headers['x-admin-key'] !== ADMIN_KEY) {
+    sendJson(response, 401, { error: 'Clave incorrecta.' });
+    return;
+  }
+
+  const contentType = request.headers['content-type'] || '';
+  const boundaryMatch = contentType.match(/boundary=(.+)$/);
+  if (!boundaryMatch) {
+    sendJson(response, 400, { error: 'Petición de álbum no válida.' });
+    return;
+  }
+
+  try {
+    const body = await getRequestBody(request);
+    const { fields, files } = parseMultipart(body, boundaryMatch[1]);
+    const result = saveAlbum(fields, files);
+
+    if (result.error) {
+      sendJson(response, 400, { error: result.error });
+      return;
+    }
+
+    sendJson(response, 200, result);
+  } catch (error) {
+    sendJson(response, 413, { error: error.message || 'No se pudo guardar el álbum.' });
+  }
+}
+
+async function handleAlbumDelete(request, response) {
+  if (request.headers['x-admin-key'] !== ADMIN_KEY) {
+    sendJson(response, 401, { error: 'Clave incorrecta.' });
+    return;
+  }
+
+  try {
+    const body = await getRequestBody(request);
+    const payload = JSON.parse(body.toString('utf8') || '{}');
+    const albums = readAlbumsMeta().map(normalizeAlbum);
+    const album = albums.find((item) => item.id === payload.id);
+
+    if (!album) {
+      sendJson(response, 404, { error: 'Álbum no encontrado.' });
+      return;
+    }
+
+    const albumDir = path.join(IMAGES_DIR, album.id);
+    if (fs.existsSync(albumDir)) fs.rmSync(albumDir, { recursive: true, force: true });
+    writeAlbumsMeta(albums.filter((item) => item.id !== payload.id));
+    sendJson(response, 200, { success: true });
+  } catch (error) {
+    sendJson(response, 400, { error: 'No se pudo eliminar el álbum.' });
+  }
+}
+
+async function handlePhotoDelete(request, response, albumId) {
+  if (request.headers['x-admin-key'] !== ADMIN_KEY) {
+    sendJson(response, 401, { error: 'Clave incorrecta.' });
+    return;
+  }
+
+  try {
+    const body = await getRequestBody(request);
+    const payload = JSON.parse(body.toString('utf8') || '{}');
+    const filename = path.basename(payload.name || '');
+    const filePath = path.join(IMAGES_DIR, albumId, filename);
+    const resolvedPath = path.resolve(filePath);
+
+    if (!filename || !resolvedPath.startsWith(path.resolve(path.join(IMAGES_DIR, albumId)))) {
+      sendJson(response, 400, { error: 'Foto no válida.' });
+      return;
+    }
+
+    if (fs.existsSync(resolvedPath)) fs.unlinkSync(resolvedPath);
+
+    const albums = readAlbumsMeta().map(normalizeAlbum);
+    const albumIndex = albums.findIndex((album) => album.id === albumId);
+    if (albumIndex >= 0 && albums[albumIndex].coverUrl.endsWith(`/${filename}`)) {
+      albums[albumIndex].coverUrl = '';
+      albums[albumIndex].updatedAt = Date.now();
+      writeAlbumsMeta(albums);
+    }
+
+    sendJson(response, 200, { success: true });
+  } catch (error) {
+    sendJson(response, 400, { error: 'No se pudo eliminar la foto.' });
   }
 }
 
@@ -298,7 +618,12 @@ function handleRequest(request, response) {
   }
 
   if (request.method === 'GET' && url.pathname === '/api/albums') {
-    listAlbums(response);
+    listAlbums(response, request.headers['x-admin-key'] === ADMIN_KEY);
+    return;
+  }
+
+  if (request.method === 'GET' && url.pathname === '/api/events') {
+    listEvents(response, request.headers['x-admin-key'] === ADMIN_KEY);
     return;
   }
 
@@ -308,8 +633,34 @@ function handleRequest(request, response) {
     return;
   }
 
+  const albumPhotoDeleteMatch = url.pathname.match(/^\/api\/albums\/([^/]+)\/photos\/delete$/);
+  if (request.method === 'POST' && albumPhotoDeleteMatch) {
+    handlePhotoDelete(request, response, decodeURIComponent(albumPhotoDeleteMatch[1]));
+    return;
+  }
+
   if (request.method === 'POST' && url.pathname === '/api/upload') {
     handleUpload(request, response);
+    return;
+  }
+
+  if (request.method === 'POST' && url.pathname === '/api/albums') {
+    handleAlbumSave(request, response);
+    return;
+  }
+
+  if (request.method === 'POST' && url.pathname === '/api/albums/delete') {
+    handleAlbumDelete(request, response);
+    return;
+  }
+
+  if (request.method === 'POST' && url.pathname === '/api/events') {
+    handleEventSave(request, response);
+    return;
+  }
+
+  if (request.method === 'POST' && url.pathname === '/api/events/delete') {
+    handleEventDelete(request, response);
     return;
   }
 
@@ -319,7 +670,7 @@ function handleRequest(request, response) {
     return;
   }
 
-  const pathname = url.pathname === '/' ? '/index.html' : decodeURIComponent(url.pathname);
+  const pathname = url.pathname === '/' ? '/index.html' : (url.pathname === '/galeria' || url.pathname === '/albumes' ? '/galeria.html' : decodeURIComponent(url.pathname));
   serveFile(response, path.join(ROOT_DIR, pathname));
 }
 

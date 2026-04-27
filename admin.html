@@ -3,55 +3,129 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin | desmayo</title>
+    <title>Admin | Desmayo</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main>
       <section class="upload admin-panel" id="subir-fotos">
         <p class="eyebrow">Zona privada</p>
-        <h1>Sube tus fotos</h1>
-        <p>Introduce tu clave, elige las imagenes y se guardaran en la carpeta imagenes del backend.</p>
+        <h1>Gestiona álbumes</h1>
+        <p>Crea álbumes completos con portada, sala, fecha, estado y fotos. Todo se publica automáticamente en la galería.</p>
 
         <div class="admin-form">
           <label for="adminKey">Clave de administrador</label>
           <input id="adminKey" type="password" autocomplete="current-password" placeholder="Tu clave" />
+          <input id="albumIdInput" type="hidden" />
 
           <div class="album-mode">
             <label>
               <input type="radio" name="albumMode" value="new" checked />
-              Nuevo album
+              Nuevo álbum
             </label>
             <label>
               <input type="radio" name="albumMode" value="existing" />
-              Album existente
+              Álbum existente
             </label>
           </div>
 
           <div class="album-fields" id="newAlbumFields">
-            <label for="albumName">Nombre del album</label>
+            <label for="albumName">Nombre del álbum</label>
             <input id="albumName" type="text" placeholder="Ej: Fiesta viernes 20" />
-
-            <label for="albumDescription">Descripcion</label>
-            <textarea id="albumDescription" rows="3" placeholder="Opcional"></textarea>
           </div>
 
           <div class="album-fields is-hidden" id="existingAlbumFields">
-            <label for="albumSelect">Elegir album</label>
+            <label for="albumSelect">Elegir álbum</label>
             <select id="albumSelect">
-              <option value="">Cargando albumes...</option>
+              <option value="">Cargando álbumes...</option>
             </select>
           </div>
 
-          <label for="photoInput">Fotos</label>
+          <label for="albumDate">Fecha</label>
+          <input id="albumDate" type="date" />
+
+          <label for="albumVenue">Sala / club</label>
+          <input id="albumVenue" type="text" placeholder="Ej: Zsa Zsa" />
+
+          <label for="albumCity">Ciudad</label>
+          <input id="albumCity" type="text" placeholder="Ej: Barcelona" />
+
+          <label for="albumDescription">Descripción</label>
+          <textarea id="albumDescription" rows="3" placeholder="Opcional"></textarea>
+
+          <label for="albumCover">Imagen de portada</label>
+          <input type="file" id="albumCover" accept="image/*" />
+
+          <label for="albumStatus">Estado</label>
+          <select id="albumStatus">
+            <option value="visible">Visible</option>
+            <option value="hidden">Oculto</option>
+          </select>
+
+          <div class="album-mode">
+            <label>
+              <input id="albumFeatured" type="checkbox" />
+              Destacado
+            </label>
+          </div>
+
+          <label for="albumOrder">Orden</label>
+          <input id="albumOrder" type="number" value="0" />
+
+          <label for="photoInput">Fotos del álbum</label>
           <input type="file" id="photoInput" accept="image/*" multiple />
 
-          <button class="btn btn-primary" id="uploadButton" type="button">Subir fotos</button>
+          <button class="btn btn-primary" id="uploadButton" type="button">Guardar álbum</button>
+          <button class="btn btn-secondary" id="clearAlbumButton" type="button">Nuevo álbum</button>
           <span class="status" id="uploadStatus">Esperando fotos</span>
         </div>
 
         <div class="preview-grid" id="previewGrid"></div>
+        <div class="admin-event-list" id="albumAdminList"></div>
         <a class="btn btn-secondary" href="index.html">Volver a la web</a>
+      </section>
+
+      <section class="events-admin admin-panel" id="eventos">
+        <p class="eyebrow">Calendario</p>
+        <h1>Gestiona eventos</h1>
+        <p>Añade fechas, sube flyers y decide qué eventos aparecen visibles en la web.</p>
+
+        <div class="admin-form event-form">
+          <input id="eventId" type="hidden" />
+
+          <label for="eventDay">Día</label>
+          <input id="eventDay" type="text" maxlength="2" placeholder="Ej: 24" />
+
+          <label for="eventMonth">Mes</label>
+          <input id="eventMonth" type="text" maxlength="12" placeholder="Ej: MAY" />
+
+          <label for="eventLocation">Ciudad o ubicación</label>
+          <input id="eventLocation" type="text" placeholder="Ej: Barcelona" />
+
+          <label for="eventTitle">Título del evento</label>
+          <input id="eventTitle" type="text" placeholder="Ej: Desmayo Club Night" />
+
+          <label for="eventDescription">Descripción corta</label>
+          <textarea id="eventDescription" rows="3" placeholder="Opcional"></textarea>
+
+          <label for="eventSortDate">Fecha real para ordenar</label>
+          <input id="eventSortDate" type="date" />
+
+          <label for="eventStatus">Estado</label>
+          <select id="eventStatus">
+            <option value="visible">Visible</option>
+            <option value="hidden">Oculto</option>
+          </select>
+
+          <label for="eventFlyer">Flyer / imagen de fondo</label>
+          <input id="eventFlyer" type="file" accept="image/*" />
+
+          <button class="btn btn-primary" id="saveEventButton" type="button">Guardar evento</button>
+          <button class="btn btn-secondary" id="clearEventButton" type="button">Nuevo evento</button>
+          <span class="status" id="eventStatusText">Esperando datos</span>
+        </div>
+
+        <div class="admin-event-list" id="eventList"></div>
       </section>
     </main>
 
