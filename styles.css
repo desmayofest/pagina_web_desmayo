@@ -99,6 +99,10 @@ img {
   text-shadow: 0 0 24px rgba(0, 0, 0, 0.46);
 }
 
+.site-nav-brand img {
+  display: none;
+}
+
 .site-nav-brand span {
   display: block;
 }
@@ -335,6 +339,81 @@ img {
   z-index: 4;
   width: min(850px, 100%);
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.72);
+}
+
+@media (min-width: 841px) {
+  .site-nav-brand {
+    position: relative;
+    min-width: 168px;
+    min-height: 60px;
+    text-shadow: none;
+  }
+
+  .site-nav-brand img {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 168px;
+    height: auto;
+    filter:
+      brightness(1.32)
+      saturate(1.26)
+      contrast(1.16)
+      drop-shadow(0 0 18px rgba(245, 0, 159, 0.42));
+    animation: navLogoShift 1.3s ease-in-out infinite alternate;
+  }
+
+  .site-nav-brand::before,
+  .site-nav-brand::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mask: url("assets/desmayo-rosa.png") left center / contain no-repeat;
+    -webkit-mask: url("assets/desmayo-rosa.png") left center / contain no-repeat;
+  }
+
+  .site-nav-brand::before {
+    z-index: 1;
+    background: #8b00ff;
+    opacity: 0.72;
+    filter: drop-shadow(0 0 14px rgba(139, 0, 255, 0.6));
+    animation: navLogoGlitch 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite both;
+  }
+
+  .site-nav-brand::after {
+    z-index: 0;
+    background: #00e571;
+    opacity: 0.62;
+    filter: drop-shadow(0 0 14px rgba(0, 229, 113, 0.44));
+    animation: navLogoGlitch 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite reverse both;
+  }
+
+  .site-nav-brand span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .hero {
+    align-items: start;
+    padding-top: clamp(5.4rem, 8vw, 6.4rem);
+  }
+
+  .hero-content {
+    margin-top: -0.4rem;
+  }
+
+  .hero-content .brand-lockup {
+    margin-bottom: 1rem;
+  }
+
+  .hero-content h1 {
+    margin-top: 0;
+  }
 }
 
 .brand-lockup {
@@ -1066,6 +1145,62 @@ footer p {
 
   .calendar-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@keyframes navLogoGlitch {
+  0% {
+    transform: translate(0);
+  }
+
+  20% {
+    transform: translate(-3px, 2px);
+  }
+
+  40% {
+    transform: translate(-3px, -2px);
+  }
+
+  60% {
+    transform: translate(3px, 2px);
+  }
+
+  80% {
+    transform: translate(3px, -2px);
+  }
+
+  100% {
+    transform: translate(0);
+  }
+}
+
+@keyframes navLogoShift {
+  0%,
+  40%,
+  44%,
+  58%,
+  61%,
+  65%,
+  69%,
+  73%,
+  100% {
+    transform: skewX(0deg);
+  }
+
+  41% {
+    transform: skewX(3deg);
+  }
+
+  42% {
+    transform: skewX(-3deg);
+  }
+
+  59% {
+    transform: skewX(8deg) skewY(2deg);
+  }
+
+  60% {
+    transform: skewX(-8deg) skewY(-2deg);
   }
 }
 
