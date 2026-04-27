@@ -6,6 +6,13 @@ const navToggle = document.getElementById('navToggle');
 const navMenu = document.getElementById('navMenu');
 const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
 
+function setMenuState(isOpen) {
+  if (!navToggle || !navMenu) return;
+  navMenu.classList.toggle('is-open', isOpen);
+  navToggle.setAttribute('aria-expanded', String(isOpen));
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+
 function renderEmptyGallery(message) {
   galleryGrid.innerHTML = `<p class="gallery-empty">${message}</p>`;
 }
@@ -112,15 +119,26 @@ backToAlbums.addEventListener('click', loadAlbums);
 
 if (navToggle && navMenu) {
   navToggle.addEventListener('click', () => {
-    const isOpen = navMenu.classList.toggle('is-open');
-    navToggle.setAttribute('aria-expanded', String(isOpen));
+    const isOpen = navToggle.getAttribute('aria-expanded') !== 'true';
+    setMenuState(isOpen);
   });
 
   navMenu.querySelectorAll('a').forEach((link) => {
     link.addEventListener('click', () => {
-      navMenu.classList.remove('is-open');
-      navToggle.setAttribute('aria-expanded', 'false');
+      setMenuState(false);
     });
+  });
+
+  navMenu.addEventListener('click', (event) => {
+    if (event.target === navMenu) {
+      setMenuState(false);
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      setMenuState(false);
+    }
   });
 }
 
