@@ -2,10 +2,11 @@ const galleryGrid = document.getElementById('galleryGrid');
 const galleryTitle = document.getElementById('galleryTitle');
 const galleryDescription = document.getElementById('galleryDescription');
 const backToAlbums = document.getElementById('backToAlbums');
+const navToggle = document.getElementById('navToggle');
+const navMenu = document.getElementById('navMenu');
 const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
 
 function renderEmptyGallery(message) {
-  if (!galleryGrid) return;
   galleryGrid.innerHTML = `<p class="gallery-empty">${message}</p>`;
 }
 
@@ -48,20 +49,18 @@ function renderAlbumCard(album) {
 }
 
 async function loadAlbums() {
-  if (!galleryGrid || !galleryTitle || !galleryDescription || !backToAlbums) return;
-
-  galleryTitle.textContent = 'Álbumes de fiestas';
+  galleryTitle.textContent = 'Albumes de fiestas';
   galleryDescription.textContent = 'Selecciona una fiesta para ver todas sus fotos.';
   backToAlbums.classList.add('is-hidden');
-  renderEmptyGallery('Cargando álbumes...');
+  renderEmptyGallery('Cargando albumes...');
 
   try {
     const response = await fetch(`${API_BASE}/api/albums`);
-    if (!response.ok) throw new Error('No se pudieron cargar los álbumes');
+    if (!response.ok) throw new Error('No se pudieron cargar los albumes');
 
     const albums = await response.json();
     if (!albums.length) {
-      renderEmptyGallery('Todavía no hay álbumes subidos.');
+      renderEmptyGallery('Todavia no hay albumes subidos.');
       return;
     }
 
@@ -70,18 +69,16 @@ async function loadAlbums() {
       galleryGrid.appendChild(renderAlbumCard(album));
     });
   } catch (error) {
-    renderEmptyGallery('No se pudieron cargar los álbumes ahora mismo.');
+    renderEmptyGallery('No se pudieron cargar los albumes ahora mismo.');
   }
 }
 
 async function loadAlbum(albumId) {
-  if (!galleryGrid || !galleryTitle || !galleryDescription || !backToAlbums) return;
-
   renderEmptyGallery('Cargando fotos...');
 
   try {
     const response = await fetch(`${API_BASE}/api/albums/${encodeURIComponent(albumId)}/images`);
-    if (!response.ok) throw new Error('No se pudo cargar el álbum');
+    if (!response.ok) throw new Error('No se pudo cargar el album');
 
     const album = await response.json();
     galleryTitle.textContent = album.name;
@@ -89,7 +86,7 @@ async function loadAlbum(albumId) {
     backToAlbums.classList.remove('is-hidden');
 
     if (!album.images.length) {
-      renderEmptyGallery('Este álbum todavía no tiene fotos.');
+      renderEmptyGallery('Este album todavia no tiene fotos.');
       return;
     }
 
@@ -107,9 +104,24 @@ async function loadAlbum(albumId) {
       galleryGrid.appendChild(card);
     });
   } catch (error) {
-    renderEmptyGallery('No se pudo cargar este álbum ahora mismo.');
+    renderEmptyGallery('No se pudo cargar este album ahora mismo.');
   }
 }
 
-backToAlbums?.addEventListener('click', loadAlbums);
+backToAlbums.addEventListener('click', loadAlbums);
+
+if (navToggle && navMenu) {
+  navToggle.addEventListener('click', () => {
+    const isOpen = navMenu.classList.toggle('is-open');
+    navToggle.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  navMenu.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      navMenu.classList.remove('is-open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+}
+
 loadAlbums();
