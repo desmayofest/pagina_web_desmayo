@@ -383,18 +383,21 @@ img {
   position: relative;
   z-index: 4;
   width: min(850px, 100%);
+  padding-top: clamp(7.5rem, 12vw, 9rem);
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.72);
 }
 
 .brand-lockup {
-  position: relative;
+  position: absolute;
+  top: 1rem;
+  left: 0;
   isolation: isolate;
-  width: min(620px, 96vw);
-  margin: 0 0 clamp(1.25rem, 3vw, 2rem);
+  width: min(360px, 42vw);
+  margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
-  transform: translateX(clamp(-7rem, -10vw, -2.8rem));
+  transform: none;
 }
 
 .brand-lockup::before {
@@ -428,7 +431,7 @@ img {
 .brand-lockup img {
   position: relative;
   z-index: 2;
-  max-height: 170px;
+  max-height: 118px;
   object-fit: contain;
   mix-blend-mode: normal;
   filter:
@@ -1025,6 +1028,22 @@ footer p {
 }
 
 @media (max-width: 840px) {
+  .hero-content {
+    padding-top: 0;
+  }
+
+  .brand-lockup {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: min(620px, 96vw);
+    margin: 0 0 clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .brand-lockup img {
+    max-height: 170px;
+  }
+
   .site-nav {
     top: 0.75rem;
     right: 0.75rem;
