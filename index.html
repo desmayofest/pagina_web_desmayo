@@ -3,33 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Desmayo | Portada</title>
+    <title>Desmayo</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <nav class="corner-nav" aria-label="Navegacion principal">
-      <a class="brand-mark" href="index.html" aria-label="Desmayo">
-        <img src="assets/desmayo-rosa.png" alt="Desmayo" />
-      </a>
-      <button class="menu-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navMenu" aria-label="Abrir menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </nav>
-
-    <div class="menu-overlay" id="navMenu" aria-hidden="true">
-      <button class="menu-close" id="navClose" type="button" aria-label="Cerrar menu"></button>
-      <div class="menu-panel">
-        <a href="index.html">Portada</a>
-        <a href="index.html#eventos">Eventos</a>
-        <a href="galeria.html">Galeria</a>
-        <a href="sobre-nosotros.html">Sobre nosotros</a>
-        <a href="contacto.html">Contacto</a>
-      </div>
-      <div class="language-chip">Catalunya / Costa Brava</div>
-    </div>
-
     <header class="home-hero" id="top">
       <div class="hero-slideshow" aria-hidden="true">
         <span class="hero-slide hero-slide-1"></span>
@@ -40,19 +17,24 @@
       </div>
       <div class="hero-noise" aria-hidden="true"></div>
       <div class="home-hero-content">
+        <a class="brand-mark hero-brand" href="#top" aria-label="Desmayo">
+          <img src="assets/desmayo-rosa.png" alt="Desmayo" />
+        </a>
         <p class="eyebrow">Party promotora</p>
         <h1>Desmayo</h1>
         <p class="hero-copy">Noches grandes, fotos con sudor y planes que empiezan por WhatsApp.</p>
-        <a class="btn btn-primary" href="#eventos">Ver proximos eventos</a>
+        <a class="btn btn-primary" href="#eventos">Ver próximos eventos</a>
       </div>
     </header>
 
     <main>
       <section class="events-section" id="eventos">
         <div class="section-heading">
-          <p class="eyebrow">Agenda</p>
-          <h2>Proximos eventos</h2>
-          <p>Fechas en preparacion para volver a llenar pista, terraza y madrugada.</p>
+          <div>
+            <p class="eyebrow">Agenda</p>
+            <h2>Próximos eventos</h2>
+          </div>
+          <p>Fechas en preparación para volver a llenar pista, terraza y madrugada.</p>
         </div>
 
         <div class="event-list">
@@ -60,24 +42,62 @@
             <span class="event-date">Muy pronto</span>
             <h3>Costa Brava Summer</h3>
             <p>Open air, calor, amigos y ese punto de caos bonito que hace que una noche se recuerde.</p>
-            <a class="text-link" href="contacto.html">Preguntar por lista</a>
+            <a class="text-link" href="#contacto">Preguntar por lista</a>
           </article>
           <article class="event-card">
-            <span class="event-date">Proximamente</span>
+            <span class="event-date">Próximamente</span>
             <h3>Barcelona Club Night</h3>
-            <p>Sesion urbana con invitados y reserva de mesa VIP disponible.</p>
+            <p>Sesión urbana con invitados y reserva de mesa VIP disponible.</p>
           </article>
           <article class="event-card">
-            <span class="event-date">Proximamente</span>
+            <span class="event-date">Próximamente</span>
             <h3>Especial Menorca</h3>
-            <p>Edicion verano con energia de Sant Joan y sonido mediterraneo.</p>
+            <p>Edición verano con energía de Sant Joan y sonido mediterráneo.</p>
           </article>
+        </div>
+      </section>
+
+      <section class="gallery" id="galeria">
+        <div class="gallery-header">
+          <div>
+            <p class="eyebrow">Fotos</p>
+            <h2 id="galleryTitle">Álbumes de fiestas</h2>
+            <p id="galleryDescription">Selecciona una fiesta para ver todas sus fotos.</p>
+          </div>
+          <button class="btn btn-secondary gallery-back is-hidden" id="backToAlbums" type="button">Ver álbumes</button>
+        </div>
+        <div class="grid" id="galleryGrid">
+          <p class="gallery-empty">Cargando álbumes...</p>
+        </div>
+      </section>
+
+      <section class="story-section" id="about">
+        <div class="story-image">
+          <img src="imagenes/IMG_3605.jpg" alt="Fiesta Desmayo" />
+        </div>
+        <div class="story-copy">
+          <p class="eyebrow">Sobre nosotros</p>
+          <h2>La comunidad detrás de Desmayo</h2>
+          <p>Somos una fiesta nacida en 2023 en la Costa Brava con una obsesión clara: crear noches que no se olvidan.</p>
+          <p>En tres años hemos construido una comunidad con ambiente top, música, gente y lugares que se fusionan para dar vida a algo único.</p>
+          <p>Hemos llevado nuestra energía por capitales catalanas, Sant Joan en Menorca y temporadas en Val Thorens, entre après-ski y discoteca.</p>
+          <p>Por nuestros escenarios han pasado artistas como Alex Martini o Alvama Ice. Esto solo está empezando.</p>
+        </div>
+      </section>
+
+      <section class="contact-hero" id="contacto">
+        <p class="eyebrow">Reservas / contacto</p>
+        <h2>Contacto</h2>
+        <p>Para listas, mesas VIP, colaboraciones o dudas rápidas, escribe directo.</p>
+        <div class="cta-actions">
+          <a class="btn btn-primary" href="https://wa.me/34636671788?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20Desmayo." target="_blank" rel="noopener">WhatsApp</a>
+          <a class="btn btn-secondary" href="https://zsazsadiscotheque.com/?utm_source=desmayo_web" target="_blank" rel="noopener">Reservar VIP</a>
         </div>
       </section>
     </main>
 
     <footer>
-      <p>Desmayo 2026 | Contacto rapido por WhatsApp</p>
+      <p>Desmayo 2026 | Contacto rápido por WhatsApp</p>
     </footer>
     <script src="script.js"></script>
   </body>
