@@ -10,6 +10,20 @@
     <div class="logo-loader" aria-label="Cargando Desmayo">
       <div class="logo-loader-mark"></div>
     </div>
+    <nav class="site-nav">
+      <a class="site-nav-brand" href="#top">Desmayo</a>
+      <button class="site-nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navMenu" aria-label="Abrir menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="site-nav-menu" id="navMenu">
+        <a href="#about">Sobre nosotros</a>
+        <a href="#galeria">Galerias</a>
+        <a href="#calendario">Calendario de eventos</a>
+        <a href="#contacto">Contacto</a>
+      </div>
+    </nav>
     <header class="hero">
       <div class="hero-slideshow" aria-hidden="true">
         <span class="hero-slide hero-slide-1"></span>
@@ -20,7 +34,7 @@
         <span class="hero-slide hero-slide-6"></span>
         <span class="hero-slide hero-slide-7"></span>
       </div>
-      <div class="hero-content">
+      <div class="hero-content" id="top">
         <div class="brand-lockup" aria-label="Desmayo">
           <img src="assets/desmayo-rosa.png" alt="Logo Desmayo" />
           <span>Desmayo</span>
@@ -33,11 +47,44 @@
 
     <main>
       <section class="about" id="about">
-        <h2>Que ofrecemos</h2>
-        <p>
-          Organizamos fiestas exclusivas con buena musica, ambiente unico y las mejores promociones.
-          Mira las fotos de las ultimas noches y reserva tu mesa cuando quieras.
-        </p>
+        <h2>Sobre nosotros</h2>
+        <div class="about-copy">
+          <p>
+            Somos una fiesta nacida en 2023 en la Costa Brava con una sola obsesion: crear noches que no se olvidan. En tres años hemos construido una comunidad con un ambiente top, donde la musica, la gente y el lugar se fusionan para dar vida a algo unico.
+          </p>
+          <p>
+            Hemos llevado nuestra energia por las principales capitales catalanas, hemos vivido tres ediciones seguidas de las miticas fiestas de Sant Joan en Menorca y hemos conquistado los Alpes durante dos temporadas en Val Thorens, la mejor estacion de esqui del mundo, entre el apres-ski de La Folie Douce y las noches en la discoteca Malasya.
+          </p>
+          <p>
+            Por nuestros escenarios han pasado artistas de primer nivel como Alex Martini o Alvama Ice, y esto es solo el principio.
+          </p>
+          <p>Tres años, muchas noches epicas y muchas mas por venir.</p>
+        </div>
+      </section>
+
+      <section class="calendar" id="calendario">
+        <div class="calendar-copy">
+          <p class="calendar-kicker">Calendario de eventos</p>
+          <h2>Las proximas noches ya estan calentando motores</h2>
+          <p>Mantente atento a las proximas fechas, ciudades y colaboraciones especiales de Desmayo.</p>
+        </div>
+        <div class="calendar-grid">
+          <article class="calendar-card">
+            <span>Proximamente</span>
+            <strong>Costa Brava</strong>
+            <small>Open air, sunset y noche larga</small>
+          </article>
+          <article class="calendar-card">
+            <span>Proximamente</span>
+            <strong>Barcelona</strong>
+            <small>Lineup invitado y energia Desmayo</small>
+          </article>
+          <article class="calendar-card">
+            <span>Proximamente</span>
+            <strong>Menorca</strong>
+            <small>Especial verano y vibra mediterranea</small>
+          </article>
+        </div>
       </section>
 
       <section class="gallery" id="galeria">
