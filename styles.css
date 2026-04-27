@@ -78,11 +78,11 @@ img {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid rgba(255, 247, 251, 0.12);
-  background: rgba(8, 8, 10, 0.68);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(18px);
+  padding: 0.9rem 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
   transform: translateX(-50%);
 }
 
@@ -94,6 +94,7 @@ img {
   letter-spacing: 0.02em;
   text-decoration: none;
   text-transform: uppercase;
+  text-shadow: 0 0 24px rgba(0, 0, 0, 0.46);
 }
 
 .site-nav-menu {
@@ -112,6 +113,7 @@ img {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition: color 0.2s ease, text-shadow 0.2s ease;
+  text-shadow: 0 0 20px rgba(0, 0, 0, 0.42);
 }
 
 .site-nav-menu a:hover {
@@ -954,6 +956,10 @@ footer p {
   .site-nav {
     top: 0.75rem;
     padding: 0.8rem;
+    border: 1px solid rgba(255, 247, 251, 0.12);
+    background: rgba(8, 8, 10, 0.48);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(14px);
   }
 
   .site-nav-toggle {
