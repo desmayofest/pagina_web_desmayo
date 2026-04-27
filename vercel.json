@@ -8,6 +8,9 @@
         "includeFiles": [
           "index.html",
           "admin.html",
+          "contacto.html",
+          "galeria.html",
+          "sobre-nosotros.html",
           "styles.css",
           "script.js",
           "admin.js",
