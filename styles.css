@@ -383,14 +383,14 @@ img {
   position: relative;
   z-index: 4;
   width: min(850px, 100%);
-  padding-top: clamp(7.5rem, 12vw, 9rem);
+  padding-top: clamp(5.75rem, 9vw, 7rem);
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.72);
 }
 
 .brand-lockup {
   position: absolute;
-  top: 1rem;
-  left: 0;
+  top: -4.75rem;
+  left: -0.35rem;
   isolation: isolate;
   width: min(620px, 96vw);
   margin: 0;
