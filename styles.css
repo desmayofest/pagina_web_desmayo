@@ -70,7 +70,7 @@ img {
 
 .site-nav {
   position: fixed;
-  top: 1rem;
+  top: 1.8rem;
   right: 1rem;
   z-index: 120;
   display: grid;
@@ -389,7 +389,7 @@ img {
 
 .brand-lockup {
   position: absolute;
-  top: -4.75rem;
+  top: -5.6rem;
   left: -0.35rem;
   isolation: isolate;
   width: min(620px, 96vw);
