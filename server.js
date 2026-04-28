@@ -10,11 +10,9 @@ const IMAGES_DIR = path.join(ROOT_DIR, 'imagenes');
 const ALBUMS_FILE = path.join(IMAGES_DIR, 'albumes.json');
 const EVENTS_FILE = path.join(IMAGES_DIR, 'eventos.json');
 const EVENTS_DIR = path.join(IMAGES_DIR, 'eventos');
+const IS_VERCEL = Boolean(process.env.VERCEL || process.env.VERCEL_ENV);
 const MAX_UPLOAD_SIZE = 60 * 1024 * 1024;
 const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp']);
-
-fs.mkdirSync(IMAGES_DIR, { recursive: true });
-fs.mkdirSync(EVENTS_DIR, { recursive: true });
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -71,6 +69,14 @@ function readAlbumsMeta() {
 
 function writeAlbumsMeta(albums) {
   fs.writeFileSync(ALBUMS_FILE, JSON.stringify(albums, null, 2));
+}
+
+function ensureWritableDir(dirPath) {
+  if (IS_VERCEL) {
+    throw new Error('Las subidas no estan disponibles en Vercel. Usa el backend local para gestionar contenidos.');
+  }
+
+  fs.mkdirSync(dirPath, { recursive: true });
 }
 
 function readEventsMeta() {
@@ -163,6 +169,10 @@ function validateEventFields(fields) {
 }
 
 function saveEvent(fields, files) {
+  if (IS_VERCEL) {
+    return { error: 'La gestion de eventos no esta disponible en Vercel. Ejecuta el backend local para crear o editar fechas.' };
+  }
+
   const error = validateEventFields(fields);
   if (error) return { error };
 
@@ -187,6 +197,7 @@ function saveEvent(fields, files) {
       return { error: 'El flyer debe ser una imagen válida.' };
     }
 
+    ensureWritableDir(EVENTS_DIR);
     const safeName = sanitizeFilename(flyer.filename);
     fs.writeFileSync(path.join(EVENTS_DIR, safeName), flyer.content);
     flyerUrl = `/imagenes/eventos/${safeName}`;
@@ -217,6 +228,11 @@ function saveEvent(fields, files) {
 }
 
 async function handleEventSave(request, response) {
+  if (IS_VERCEL) {
+    sendJson(response, 503, { error: 'La gestion editable de eventos requiere el backend local.' });
+    return;
+  }
+
   if (request.headers['x-admin-key'] !== ADMIN_KEY) {
     sendJson(response, 401, { error: 'Clave incorrecta.' });
     return;
@@ -246,6 +262,11 @@ async function handleEventSave(request, response) {
 }
 
 async function handleEventDelete(request, response) {
+  if (IS_VERCEL) {
+    sendJson(response, 503, { error: 'La gestion editable de eventos requiere el backend local.' });
+    return;
+  }
+
   if (request.headers['x-admin-key'] !== ADMIN_KEY) {
     sendJson(response, 401, { error: 'Clave incorrecta.' });
     return;
@@ -406,6 +427,10 @@ function validateAlbumFields(fields, isExisting) {
 }
 
 function saveAlbum(fields, files = []) {
+  if (IS_VERCEL) {
+    return { error: 'La gestion de álbumes no esta disponible en Vercel. Usa el backend local para crear, editar o subir fotos.' };
+  }
+
   const albums = readAlbumsMeta().map(normalizeAlbum);
   const mode = fields.albumMode === 'existing' || fields.albumId ? 'existing' : 'new';
   const now = Date.now();
@@ -430,7 +455,7 @@ function saveAlbum(fields, files = []) {
   }
 
   const albumDir = path.join(IMAGES_DIR, id);
-  fs.mkdirSync(albumDir, { recursive: true });
+  ensureWritableDir(albumDir);
 
   let coverUrl = existing?.coverUrl || '';
   const savedFiles = [];
@@ -486,6 +511,11 @@ function saveAlbum(fields, files = []) {
 }
 
 async function handleUpload(request, response) {
+  if (IS_VERCEL) {
+    sendJson(response, 503, { error: 'La subida de fotos requiere el backend local.' });
+    return;
+  }
+
   if (request.headers['x-admin-key'] !== ADMIN_KEY) {
     sendJson(response, 401, { error: 'Clave incorrecta.' });
     return;
@@ -520,6 +550,11 @@ async function handleUpload(request, response) {
 }
 
 async function handleAlbumSave(request, response) {
+  if (IS_VERCEL) {
+    sendJson(response, 503, { error: 'La gestion editable de albumes requiere el backend local.' });
+    return;
+  }
+
   if (request.headers['x-admin-key'] !== ADMIN_KEY) {
     sendJson(response, 401, { error: 'Clave incorrecta.' });
     return;
@@ -549,6 +584,11 @@ async function handleAlbumSave(request, response) {
 }
 
 async function handleAlbumDelete(request, response) {
+  if (IS_VERCEL) {
+    sendJson(response, 503, { error: 'La gestion editable de albumes requiere el backend local.' });
+    return;
+  }
+
   if (request.headers['x-admin-key'] !== ADMIN_KEY) {
     sendJson(response, 401, { error: 'Clave incorrecta.' });
     return;
@@ -575,6 +615,11 @@ async function handleAlbumDelete(request, response) {
 }
 
 async function handlePhotoDelete(request, response, albumId) {
+  if (IS_VERCEL) {
+    sendJson(response, 503, { error: 'La gestion editable de fotos requiere el backend local.' });
+    return;
+  }
+
   if (request.headers['x-admin-key'] !== ADMIN_KEY) {
     sendJson(response, 401, { error: 'Clave incorrecta.' });
     return;
